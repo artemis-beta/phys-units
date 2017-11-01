@@ -15,6 +15,7 @@ mol  = si_unit('mol', "<Unit('mol'), 'mol', 'quantity'>", 'quantity')
 C = combined_units((s,A), (1, 1), 'charge', 'C')
 V = combined_units((kg, m, s, A), (1,2,-3,-1), 'volt', 'V')
 J = combined_units((kg, m, s), (1,2,-2), 'joule', 'J')
+N = combined_units((kg, m, s), (1,1,-2), 'newton', 'N')
 
 #---------------------- Astro -----------------------------#
 
@@ -49,5 +50,4 @@ W._label = 'W'
 F = C/V
 F._label = 'F'
 
-print(erg == 100*J*1E-9)
-print(erg, 100*J*1E-9)
+print(N.check_dimensionality(G*M_sol*kg/pow(m,2)))

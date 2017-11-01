@@ -79,6 +79,21 @@ class combined_units(object):
 
         return tmp
 
+    def check_dimensionality(self, other):
+        if isinstance(other, si_unit):
+            if len(self._components) == 1:
+                for key in self._components:
+                    return self._components[key] == si_unit
+
+        if isinstance(other, combined_units):
+            if set(self._components.keys()) == set(other._components.keys()):
+                for key in self._components:
+                    if self._components[key] != other._components[key]:
+                        return False
+                return True
+        return False
+                                                
+
     def _compare_two(self, other):
         from math import isclose
         if set(self._components.keys()) == set(other._components.keys()) and isclose(self._magnitude._magnitude, other._magnitude._magnitude, rel_tol=1e-9, abs_tol=0.0):
@@ -164,6 +179,14 @@ class si_unit(object):
         self._unit_string   = unit_str
         self._python_string = python_str
         self._desc = desc
+
+    def check_dimensionality(self, other):
+        if isinstance(other, si_unit):
+            return other == si_unit
+        elif isinstance(other, combined_units):
+            return other.check_dimensionality(self)
+        else:
+            return False
 
     def __repr__(self):
         return self._python_string
