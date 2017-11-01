@@ -16,21 +16,18 @@ class combined_units(object):
             tmp._magnitude = self._magnitude * other._magnitude
             for unit in self._components:
                 tmp._components[unit] = self._components[unit]
-            try:
-                for unit in other._components:
-                    if unit not in _tmp._components:
-                        tmp._components[unit] = 0
-                    tmp._components[unit] += other._components[unit]
-            except:
-                pass
+            for unit in other._components:
+                if unit not in tmp._components:
+                    tmp._components[unit] = 0
+                tmp._components[unit] += other._components[unit]
 
         elif issubclass(si_unit, other.__class__):
             tmp._magnitude = self._magnitude
             for unit in self._components:
                 tmp._components[unit] = self._components[unit]
-            if other._unit_string not in tmp._components.keys():
-                tmp._components[other._unit_string] = 0
-            tmp._components[other._unit_string] += 1
+            if other not in tmp._components.keys():
+                tmp._components[other] = 0
+            tmp._components[other] += 1
 
         elif issubclass(si_unit, other.__class__):
             for unit in self._components:
@@ -50,7 +47,6 @@ class combined_units(object):
 
     def __rmul__(self, other):
         return self.__mul__(other)
-
 
     def __pow__(self, other):
         tmp = combined_units()
@@ -95,11 +91,43 @@ class combined_units(object):
             return tmp
         raise Exception("Cannot Add Unit Combinations")
 
-    def _divide_by(self, unit):
-        if unit not in self._components.keys():
-            self._components[unit] = -1
+    def __div__(self, other):
+        tmp = combined_units()
+        if issubclass(combined_units, other.__class__):
+            tmp._magnitude = self._magnitude / other._magnitude
+            for unit in self._components:
+                tmp._components[unit] = self._components[unit]
+            try:
+                for unit in other._components:
+                    if unit not in _tmp._components:
+                        tmp._components[unit] = 0
+                    tmp._components[unit] -= other._components[unit]
+            except:
+                pass
+
+        elif issubclass(si_unit, other.__class__):
+            tmp._magnitude = self._magnitude
+            for unit in self._components:
+                tmp._components[unit] = self._components[unit]
+            if other not in tmp._components.keys():
+                tmp._components[other] = 0
+            tmp._components[other] -= 1
+
+        elif issubclass(si_unit, other.__class__):
+            for unit in self._components:
+                tmp._components[unit] = self._components[unit]
+            tmp._magnitude = self._magnitude / other._magnitude
+
+        elif isinstance(other, float) or isinstance(other, int):
+            for unit in self._components:
+                tmp._components[unit] = self._components[unit]
+            tmp._magnitude = self._magnitude / other
+
+
         else:
-            self._components[unit] -= 1
+            raise Exception("Invalid Division")
+            
+        return tmp
 
     def __str__(self):
         _out_str = ''
@@ -129,18 +157,42 @@ class si_unit(object):
 
     def __mul__(self, other):
         if type(self) == type(other):
-            return combined_units([self._unit_string], [2])
+            return combined_units([self], [2])
         if isinstance(other, combined_units):
-            return combined_units([self._unit_string], [1])*other
+            return combined_units([self], [1])*other
 
         if isinstance(other, si_unit):
-            return combined_units([self._unit_string, other._unit_string], [1,1])
+            return combined_units([self, other], [1,1])
 
         else:
-            return combined_units((phys_float(other), self._unit_string), [1,1])
+            return combined_units((phys_float(other), self), [1,1])
 
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    def __div__(self, other):
+        if type(self) == type(other):
+            return combined_units()
+        if isinstance(other, combined_units):
+            return combined_units([self], [1])/other
+
+        if isinstance(other, si_unit):
+            return combined_units([self, other], [1,-1])
+
+        else:
+            return combined_units((phys_float(other), self), [1,-1])
+
+    def __rdiv__(self, other):
+        if isinstance(other, int) or isinstance(other, float):
+            _tmp = combined_units([self], [-1])
+            _tmp._magnitude = phys_float(other)
+            return _tmp
+        if isinstance(other, phys_float):
+            _tmp = combined_units([self], [-1])
+            _tmp._magnitude = other
+            return _tmp
+        else:
+            return other.__div__(self)
 
     def __pow__(self, other):
         if isinstance(other, float) or isinstance(other, int):
@@ -177,6 +229,15 @@ class phys_float(si_unit):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __div__(self, other):
+        if isinstance(other, phys_float):
+            return phys_float(self._magnitude/other._magnitude)
+        elif isinstance(other, float) or isinstance(other, int):
+            return phys_float(self._magnitude/other)
+        else:
+            return si_unit.__div__(other)
+
+
     def __str__(self):
         return str(self._magnitude)
 
@@ -197,5 +258,5 @@ V = combined_units((m, s, A), (2,-3,-1), 'volt', 'V')
 
 
 if __name__ in "__main__":
-    print(8.0*V)
+    print(C/s)
     print(A.measures())
