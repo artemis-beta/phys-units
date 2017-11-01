@@ -49,6 +49,26 @@ class combined_units(object):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+
+    def __pow__(self, other):
+        tmp = combined_units()
+        if isinstance(other, float) or isinstance(other, int):
+            tmp._magnitude = self._magnitude
+            for unit in self._components:
+                 tmp._components[unit] = self._components[unit]*other
+            tmp._magnitude = self._magnitude**other
+
+        elif isinstance(other, phys_float):
+            tmp._magnitude = self._magnitude
+            for unit in self._components:
+                 tmp._components[unit] = self._components[unit]*other._magnitude
+            tmp._magnitude = self._magnitude**other._magnitude
+
+        else:
+            raise Exception("Could not Apply Exponent of Type '{}' to Combined Units Object".format(type(other)))
+
+        return tmp
+
     def __add__(self, other):
         if set(self._components.keys()) == set(other._components.keys()):
             return self
@@ -96,6 +116,14 @@ class si_unit(object):
     def __rmul__(self, other):
         return self.__mul__(other)
 
+    def __pow__(self, other):
+        if isinstance(other, float) or isinstance(other, int):
+            return combined_units([self], [other])
+        elif isinstance(other, phys_float):
+            return combined_units([self], [other._magnitude])
+        else:
+            raise Exception("Could not Apply Exponent of Type '{}' to Phys_Float".format(type(other)))
+
     def __add__(self, other):
         if type(self) == type(other):
             return self
@@ -125,4 +153,4 @@ class phys_float(si_unit):
 
 if __name__ in "__main__":
     A = si_unit('A', "<Unit('A'), 'ampere', 'current'>")
-    print(8.0*A*4.0*A)
+    print(8.0*A**5)
