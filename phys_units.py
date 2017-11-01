@@ -1,7 +1,9 @@
 class combined_units(object):
-    def __init__(self, components=[], power_ratio=[]):
+    def __init__(self, components=[], power_ratio=[], desc=False, other_label=None):
         self._components = {}
         self._magnitude = phys_float(1)
+        self._desc = desc if desc else 'Quantity Has No Known Label'
+        self._label = other_label
         for component, exponent in zip(components, power_ratio):
             if isinstance(component, phys_float):
                 self._magnitude *= component
@@ -101,8 +103,9 @@ class combined_units(object):
 
     def __str__(self):
         _out_str = ''
-        for key in self._components:
-            _out_str += '{}{}.'.format(key if self._components[key] > 0 else '', '^{}'.format(self._components[key]) if self._components[key] > 1 else '')
+         
+        for key in sorted(self._components):
+            _out_str += '{}{}.'.format(key if self._components[key] != 0 else '', '^{}'.format(self._components[key]) if self._components[key] not in [1,0] else '')
         _out_str = '{}'.format(self._magnitude.__str__() if self._magnitude.__str__() != '1' else '')+_out_str[:-1]
         if self._magnitude.__str__() == '0':
            _out_str = '0'
@@ -112,10 +115,14 @@ class combined_units(object):
         return "<UnitsCombination('{}'), [{}]>".format(','.join(self._components.keys()), 
                                                        ','.join([str(val) for val in self._components.values()]))
 
+    def measures(self):
+        return self._desc
+
 class si_unit(object):
-    def __init__(self, unit_str, python_str):
+    def __init__(self, unit_str, python_str, desc):
         self._unit_string   = unit_str
         self._python_string = python_str
+        self._desc = desc
 
     def __repr__(self):
         return self._python_string
@@ -151,9 +158,12 @@ class si_unit(object):
     def __str__(self):
         return self._unit_string
 
+    def measures(self):
+        return self._desc
+
 class phys_float(si_unit):
     def __init__(self, magnitude):
-        si_unit.__init__(self, '', '')
+        si_unit.__init__(self, '', '', '')
         self._magnitude = magnitude
 
     def __mul__(self, other):
@@ -170,6 +180,22 @@ class phys_float(si_unit):
     def __str__(self):
         return str(self._magnitude)
 
+############# DEFINE BASE SI UNITS #######################
+
+A    = si_unit('A', "<Unit('A'), 'ampere', 'current'>", 'current')
+s    = si_unit('s', "<Unit('s'), 'second', 'time'>", 'time')
+kg   = si_unit('kg', "<Unit('kg'), 'kilogram', 'mass'>", 'mass') 
+m    = si_unit('m', "<Unit('m'), 'metre', 'length'>", 'length')
+rad  = si_unit('rad', "<Unit('rad'), 'radian', 'angle'>", 'angle')
+K    = si_unit('K', "<Unit('K'), 'kelvin', 'temperature'>", 'temperature')
+mol  = si_unit('mol', "<Unit('mol'), 'mol', 'quantity'>", 'quantity')
+
+############# COMPOUND SI UNITS ##########################
+
+C = combined_units((s,A), (1,1), 'charge', 'C')
+V = combined_units((m, s, A), (2,-3,-1), 'volt', 'V')
+
+
 if __name__ in "__main__":
-    A = si_unit('A', "<Unit('A'), 'ampere', 'current'>")
-    print(8.0*A**5-A**5)
+    print(8.0*V)
+    print(A.measures())
