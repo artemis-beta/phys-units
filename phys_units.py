@@ -97,13 +97,10 @@ class combined_units(object):
             tmp._magnitude = self._magnitude / other._magnitude
             for unit in self._components:
                 tmp._components[unit] = self._components[unit]
-            try:
-                for unit in other._components:
-                    if unit not in _tmp._components:
-                        tmp._components[unit] = 0
-                    tmp._components[unit] -= other._components[unit]
-            except:
-                pass
+            for unit in other._components:
+                 if unit not in tmp._components:
+                     tmp._components[unit] = 0
+                 tmp._components[unit] -= other._components[unit]
 
         elif issubclass(si_unit, other.__class__):
             tmp._magnitude = self._magnitude
@@ -256,7 +253,6 @@ mol  = si_unit('mol', "<Unit('mol'), 'mol', 'quantity'>", 'quantity')
 C = combined_units((s,A), (1,1), 'charge', 'C')
 V = combined_units((m, s, A), (2,-3,-1), 'volt', 'V')
 
-
 if __name__ in "__main__":
-    print(C/s)
+    print(C/V)
     print(A.measures())
