@@ -4,18 +4,16 @@ class combined_units(object):
         self._magnitude = phys_float(1)
         self._desc = desc if desc else 'Quantity Has No Known Label'
         self._label = other_label
-        for component, exponent in zip(components, power_ratio):
+        for component, exponent in zip(tuple(components), tuple(power_ratio)):
             if isinstance(component, phys_float):
                 self._magnitude *= component
             else:
                 self._components[component] = exponent
 
     def __mul__(self, other):
-        tmp = combined_units()
+        tmp = self.clone()
         if issubclass(combined_units, other.__class__):
             tmp._magnitude = self._magnitude * other._magnitude
-            for unit in self._components:
-                tmp._components[unit] = self._components[unit]
             for unit in other._components:
                 if unit not in tmp._components:
                     tmp._components[unit] = 0
@@ -23,20 +21,14 @@ class combined_units(object):
 
         elif issubclass(si_unit, other.__class__):
             tmp._magnitude = self._magnitude
-            for unit in self._components:
-                tmp._components[unit] = self._components[unit]
             if other not in tmp._components.keys():
                 tmp._components[other] = 0
             tmp._components[other] += 1
 
         elif issubclass(si_unit, other.__class__):
-            for unit in self._components:
-                tmp._components[unit] = self._components[unit]
             tmp._magnitude = self._magnitude * other._magnitude
 
         elif isinstance(other, float) or isinstance(other, int):
-            for unit in self._components:
-                tmp._components[unit] = self._components[unit]
             tmp._magnitude = self._magnitude * other
 
 
@@ -68,9 +60,7 @@ class combined_units(object):
         return tmp
 
     def __add__(self, other):
-        tmp = combined_units()
-        for unit in self._components:
-             tmp._components[unit] = self._components[unit]
+        tmp = self.clone()
         if set(self._components.keys()) == set(other._components.keys()):
             for key in self._components:
                 if self._components[key] != other._components[key]:
@@ -142,6 +132,13 @@ class combined_units(object):
 
     def measures(self):
         return self._desc
+
+    def clone(self, const=1):
+        tmp = combined_units()
+        tmp._magnitude = self._magnitude*phys_float(const)
+        for unit in self._components:
+             tmp._components[unit] = self._components[unit]
+        return tmp
 
 class si_unit(object):
     def __init__(self, unit_str, python_str, desc):
@@ -238,21 +235,3 @@ class phys_float(si_unit):
     def __str__(self):
         return str(self._magnitude)
 
-############# DEFINE BASE SI UNITS #######################
-
-A    = si_unit('A', "<Unit('A'), 'ampere', 'current'>", 'current')
-s    = si_unit('s', "<Unit('s'), 'second', 'time'>", 'time')
-kg   = si_unit('kg', "<Unit('kg'), 'kilogram', 'mass'>", 'mass') 
-m    = si_unit('m', "<Unit('m'), 'metre', 'length'>", 'length')
-rad  = si_unit('rad', "<Unit('rad'), 'radian', 'angle'>", 'angle')
-K    = si_unit('K', "<Unit('K'), 'kelvin', 'temperature'>", 'temperature')
-mol  = si_unit('mol', "<Unit('mol'), 'mol', 'quantity'>", 'quantity')
-
-############# COMPOUND SI UNITS ##########################
-
-C = combined_units((s,A), (1,1), 'charge', 'C')
-V = combined_units((m, s, A), (2,-3,-1), 'volt', 'V')
-
-if __name__ in "__main__":
-    print(C/V)
-    print(A.measures())
