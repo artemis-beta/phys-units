@@ -21,7 +21,7 @@ class combined_units(object):
                     tmp._components[unit] += other._components[unit]
             except:
                 pass
-        
+
         elif issubclass(si_unit, other.__class__):
             tmp._magnitude = self._magnitude
             for unit in self._components:
@@ -70,8 +70,27 @@ class combined_units(object):
         return tmp
 
     def __add__(self, other):
+        tmp = combined_units()
+        for unit in self._components:
+             tmp._components[unit] = self._components[unit]
         if set(self._components.keys()) == set(other._components.keys()):
-            return self
+            for key in self._components:
+                if self._components[key] != other._components[key]:
+                    raise Exception("Cannot Add Unit Combination Objects, Do Indices Match?")
+            tmp._magnitude = phys_float(self._magnitude._magnitude+other._magnitude._magnitude)
+            return tmp
+        raise Exception("Cannot Add Unit Combinations")
+
+    def __sub__(self, other):
+        tmp = combined_units()
+        for unit in self._components:
+             tmp._components[unit] = self._components[unit]
+        if set(self._components.keys()) == set(other._components.keys()):
+            for key in self._components:
+                if self._components[key] != other._components[key]:
+                    raise Exception("Cannot Add Unit Combination Objects, Do Indices Match?")
+            tmp._magnitude = phys_float(self._magnitude._magnitude-other._magnitude._magnitude)
+            return tmp
         raise Exception("Cannot Add Unit Combinations")
 
     def _divide_by(self, unit):
@@ -153,4 +172,4 @@ class phys_float(si_unit):
 
 if __name__ in "__main__":
     A = si_unit('A', "<Unit('A'), 'ampere', 'current'>")
-    print(8.0*A**5)
+    print(8.0*A**5-A**5)
