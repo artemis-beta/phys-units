@@ -16,6 +16,20 @@ class combined_units(object):
                 return key
         return None
 
+    def __eq__(self, other):
+        if isinstance(other, int) or isinstance(other, float):
+            return self._magnitude._magnitude == other
+
+        if isinstance(other, si_unit):
+            _tmp = combined_units((other,), (1,))
+
+        else:
+            _tmp = other
+
+        return self._compare_two(_tmp)
+
+        
+
     def __mul__(self, other):
         tmp = self.clone()
         if issubclass(combined_units, other.__class__):
@@ -65,27 +79,32 @@ class combined_units(object):
 
         return tmp
 
+    def _compare_two(self, other):
+        from math import isclose
+        if set(self._components.keys()) == set(other._components.keys()) and isclose(self._magnitude._magnitude, other._magnitude._magnitude, rel_tol=1e-9, abs_tol=0.0):
+            for key in self._components:
+                if self._components[key] != other._components[key]:
+                    return False
+            return True
+        return False
+
     def __add__(self, other):
         tmp = self.clone()
-        if set(self._components.keys()) == set(other._components.keys()):
-            for key in self._components:
-                if self._components[key] != other._components[key]:
-                    raise Exception("Cannot Add Unit Combination Objects, Do Indices Match?")
-            tmp._magnitude = phys_float(self._magnitude._magnitude+other._magnitude._magnitude)
-            return tmp
-        raise Exception("Cannot Add Unit Combinations")
+        try:
+            assert self._compare_two(other)
+        except:
+            raise Exception("Cannot Add Unit Combination Objects, Do Indices Match?")
+        tmp._magnitude = phys_float(self._magnitude._magnitude+other._magnitude._magnitude)
+        return tmp
 
     def __sub__(self, other):
-        tmp = combined_units()
-        for unit in self._components:
-             tmp._components[unit] = self._components[unit]
-        if set(self._components.keys()) == set(other._components.keys()):
-            for key in self._components:
-                if self._components[key] != other._components[key]:
-                    raise Exception("Cannot Add Unit Combination Objects, Do Indices Match?")
-            tmp._magnitude = phys_float(self._magnitude._magnitude-other._magnitude._magnitude)
-            return tmp
-        raise Exception("Cannot Add Unit Combinations")
+        tmp = self.clone()
+        try:
+            assert self._compare_two(other)
+        except:
+            raise Exception("Cannot Subtract Unit Combination Objects, Do Indices Match?")
+        tmp._magnitude = phys_float(self._magnitude._magnitude-other._magnitude._magnitude)
+        return tmp
 
     def __truediv__(self, other):
         tmp = self.clone()
@@ -132,8 +151,9 @@ class combined_units(object):
     def measures(self):
         return self._desc
 
-    def clone(self, const=1):
+    def clone(self, label=None, const=1):
         tmp = combined_units()
+        tmp._label = label
         tmp._magnitude = self._magnitude*phys_float(const)
         for unit in self._components:
              tmp._components[unit] = self._components[unit]
