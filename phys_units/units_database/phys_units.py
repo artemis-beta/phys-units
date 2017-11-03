@@ -16,6 +16,9 @@ class combined_units(object):
                 return key
         return None
 
+    def get_magnitude(self):
+        return self._magnitude._magnitude
+
     def __eq__(self, other):
         if isinstance(other, int) or isinstance(other, float):
             return self._magnitude._magnitude == other
@@ -39,21 +42,23 @@ class combined_units(object):
                     tmp._components[unit] = 0
                 tmp._components[unit] += other._components[unit]
 
-        elif issubclass(si_unit, other.__class__):
+        elif isinstance(si_unit, other.__class__):
             tmp._magnitude = self._magnitude
             if other not in tmp._components.keys():
                 tmp._components[other] = 0
             tmp._components[other] += 1
 
         elif issubclass(si_unit, other.__class__):
-            tmp._magnitude = self._magnitude * other._magnitude
+            tmp._magnitude = self._magnitude 
 
         elif isinstance(other, float) or isinstance(other, int):
             tmp._magnitude = self._magnitude * other
 
+        elif isinstance(other, phys_float):
+            tmp._magnitude = self._magnitude * other._magnitude
 
         else:
-            raise Exception("Invalid Product")
+            raise Exception("Invalid Product '{}*{}'".format(type(other), type(self)))
             
         return tmp
 
@@ -106,7 +111,7 @@ class combined_units(object):
     def __add__(self, other):
         tmp = self.clone()
         try:
-            assert self._compare_two(other)
+            assert self.check_dimensionality(other)
         except:
             raise Exception("Cannot Add Unit Combination Objects, Do Indices Match?")
         tmp._magnitude = phys_float(self._magnitude._magnitude+other._magnitude._magnitude)
@@ -115,7 +120,7 @@ class combined_units(object):
     def __sub__(self, other):
         tmp = self.clone()
         try:
-            assert self._compare_two(other)
+            assert self.check_dimensionality(other)
         except:
             raise Exception("Cannot Subtract Unit Combination Objects, Do Indices Match?")
         tmp._magnitude = phys_float(self._magnitude._magnitude-other._magnitude._magnitude)
@@ -136,14 +141,14 @@ class combined_units(object):
                 tmp._components[other] = 0
             tmp._components[other] -= 1
 
-        elif issubclass(si_unit, other.__class__):
+        elif isinstance(other, si_unit):
             tmp._magnitude = self._magnitude / other._magnitude
 
         elif isinstance(other, float) or isinstance(other, int):
             tmp._magnitude = self._magnitude / other
 
         else:
-            raise Exception("Invalid Division")
+            raise Exception("Invalid Division '{}/{}'".format(type(self), type(other)))
             
         return tmp
 
@@ -157,17 +162,19 @@ class combined_units(object):
         _out_str = '{}'.format(self._magnitude.__str__() if self._magnitude.__str__() != '1' else '')+_out_str[:-1]
         if self._magnitude.__str__() == '0':
            _out_str = '0'
+        if _out_str[-1] == '.':
+            _out_str = _out_str[:-1]
         return _out_str
 
     def __repr__(self):
-        return "<UnitsCombination('{}'), [{}]>".format(','.join(self._components.keys()), 
+        return "<UnitsCombination('{}'), [{}]>".format(','.join([x._unit_string for x in self._components.keys()]), 
                                                        ','.join([str(val) for val in self._components.values()]))
 
     def measures(self):
         return self._desc
 
     def clone(self, label=None, const=1):
-        tmp = combined_units()
+        tmp = combined_units(desc=label)
         tmp._label = label
         tmp._magnitude = self._magnitude*phys_float(const)
         for unit in self._components:
@@ -187,6 +194,7 @@ class si_unit(object):
             return other.check_dimensionality(self)
         else:
             return False
+
 
     def __repr__(self):
         return self._python_string
@@ -249,18 +257,33 @@ class si_unit(object):
     def measures(self):
         return self._desc
 
+    def clone(self, label, constant=1):
+        return combined_units((self,), (1,), '', label, const=constant)
+
 class phys_float(si_unit):
     def __init__(self, magnitude):
         si_unit.__init__(self, '', '', '')
         self._magnitude = magnitude
+
+    def get_magnitude(self):
+        return self._magnitude
 
     def __mul__(self, other):
         if isinstance(other, phys_float):
             return phys_float(self._magnitude*other._magnitude)
         elif isinstance(other, float) or isinstance(other, int):
             return phys_float(self._magnitude*other)
+      
+        elif isinstance(other, combined_units):
+            _tmp = other.clone()
+            _tmp._magnitude *= phys_float(other.get_magnitude())
+            return _tmp
+
         else:
             return si_unit.__mul__(other)
+
+    def __abs__(self):
+        return abs(self._magnitude)
 
     def __rmul__(self, other):
         return self.__mul__(other)
