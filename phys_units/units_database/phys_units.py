@@ -1,3 +1,5 @@
+import math
+
 class combined_units(object):
     def __init__(self, components=[], power_ratio=[], desc=False, other_label=None, const=None):
         self._components = {}
@@ -9,6 +11,13 @@ class combined_units(object):
                 self._magnitude *= component
             else:
                 self._components[component] = exponent
+
+    def __sin__(self):
+        return phys_float(math.sin(self.get_magnitude()))
+
+
+    def __cos__(self):
+        return phys_float(math.cos(self.get_magnitude()))
 
     def _get_key(self, unit_str):
         for key in self._components:
@@ -160,8 +169,8 @@ class combined_units(object):
         for key, label in zip(_sorted_keys, _sorted_units):
             _out_str += '{}{}.'.format(label if self._components[key] != 0 else '', '^{}'.format(self._components[key]) if self._components[key] not in [1,0] else '')
         _out_str = '{}'.format(self._magnitude.__str__() if self._magnitude.__str__() != '1' else '')+_out_str[:-1]
-        if self._magnitude.__str__() == '0':
-           _out_str = '0'
+        #if self._magnitude.__str__() == '0':
+        #   _out_str = '0'
         if _out_str[-1] == '.':
             _out_str = _out_str[:-1]
         return _out_str

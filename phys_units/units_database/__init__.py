@@ -29,10 +29,10 @@ erg = pu.combined_units((kg, m, s), (1, 2, -2), 'work done', 'erg', const=1E-7)
 #----------------------- HEP ------------------------------#
 
 eV  =  J.clone('eV', 1.6E-19)
-keV =  eV.clone('keV', 1E-3) 
-MeV =  eV.clone('MeV', 1E-6)
-GeV =  eV.clone('GeV', 1E-9)
-TeV =  eV.clone('TeV', 1E-12)
+keV =  eV.clone('keV', 1E3) 
+MeV =  eV.clone('MeV', 1E6)
+GeV =  eV.clone('GeV', 1E9)
+TeV =  eV.clone('TeV', 1E12)
 
 b  = pu.combined_units((m,), (2,), 'squared metre', 'm^2').clone('b', 1E-28)
 fb = b.clone('fb', 1E-15)
@@ -70,4 +70,5 @@ k_B = pu.combined_units((kg, m, s, K), (1,2,-2,-1), 'Boltzmann constant', 'k_B',
 R = pu.combined_units((kg, m, s, mol, K), (1,2,-2, -1, -1), 'Gas constant', 'R', const=8.3144598)
 sigma_sb = pu.combined_units((kg, s, K), (1,-3, -4), 'Stefan-Boltzmann constant', 'sigma_sb', const=5.670367E-8)
 b = pu.combined_units((m, K), (1, -1), 'Wien constant', 'b', const=2.8977729E-3)
-NULL = pu.phys_float(0.0)
+
+NULL = pu.combined_units((m,), (0,), '', '', const=0)
