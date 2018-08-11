@@ -40,7 +40,12 @@ class combined_units(object):
 
         return self._compare_two(_tmp)
 
-        
+    def has_units(self, other):
+        if isinstance(other, list):
+            _comp = sorted([j._unit_string for j in self._components.keys()]) == sorted(other)
+        elif isinstance(other, combined_units):
+            _comp = sorted([j._unit_string for j in self._components.keys()]) == sorted([k._unit_string for k in other._components.keys()])
+        return _comp      
 
     def __mul__(self, other):
         tmp = self.clone()
@@ -215,7 +220,6 @@ class si_unit(object):
             return combined_units([self], [1])*other
 
         elif isinstance(other, si_unit):
-            print("C")
             return combined_units([self, other], [1,1])
 
         elif int(other) == 0:
