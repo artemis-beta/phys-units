@@ -13,10 +13,14 @@ mol  = pu.si_unit('mol', "<Unit('mol'), 'mol', 'quantity'>", 'quantity')
 
 #################### COMPOUND SI UNITS ##########################
 
+all_cunits = []
+
 C = pu.combined_units((s,A), (1, 1), 'charge', 'C')
 V = pu.combined_units((kg, m, s, A), (1,2,-3,-1), 'volt', 'V')
 J = pu.combined_units((kg, m, s), (1,2,-2), 'joule', 'J')
 N = pu.combined_units((kg, m, s), (1,1,-2), 'newton', 'N')
+
+all_cunits += [C,V,J,N]
 
 #---------------------- Astro -----------------------------#
 
@@ -72,3 +76,15 @@ sigma_sb = pu.combined_units((kg, s, K), (1,-3, -4), 'Stefan-Boltzmann constant'
 b = pu.combined_units((m, K), (1, -1), 'Wien constant', 'b', const=2.8977729E-3)
 
 NULL = pu.combined_units((m,), (0,), '', '', const=0)
+
+##################### SIMPLIFY ####################################
+
+def simplify(comp_unit):
+    for unit in all_cunits:
+        print(list(comp_unit._components.values()), list(unit._components.values()))
+        if list(comp_unit._components.values()) == list(unit._components.values()):
+            tmp = comp_unit._magnitude*pu.combined_units()
+            tmp._desc = unit._desc
+            tmp._components[pu.si_unit(unit._label,"","")] = 1
+            tmp._magnitude = comp_unit._magnitude
+            return tmp
