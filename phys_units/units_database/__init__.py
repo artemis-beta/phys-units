@@ -81,10 +81,16 @@ NULL = pu.combined_units((m,), (0,), '', '', const=0)
 
 def simplify(comp_unit):
     for unit in all_cunits:
-        print(list(comp_unit._components.values()), list(unit._components.values()))
-        if list(comp_unit._components.values()) == list(unit._components.values()):
-            tmp = comp_unit._magnitude*pu.combined_units()
-            tmp._desc = unit._desc
-            tmp._components[pu.si_unit(unit._label,"","")] = 1
-            tmp._magnitude = comp_unit._magnitude
-            return tmp
+        _match_keys = comp_unit._components.keys() == unit._components.keys()
+        if _match_keys:
+            _factor = min([abs(i) for i in comp_unit._components.values()])
+            print(_factor)
+            _other_indices = [_factor*i for i in unit._components.values()]
+            _match_indices = list(comp_unit._components.values()) == _other_indices
+            if _match_indices:
+                tmp = comp_unit._magnitude*pu.combined_units()
+                tmp._desc = unit._desc
+                tmp._components[pu.si_unit(unit._label,"","")] = _factor
+                tmp._magnitude = comp_unit._magnitude
+                return tmp
+    return comp_unit

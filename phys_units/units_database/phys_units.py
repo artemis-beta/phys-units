@@ -74,10 +74,9 @@ class combined_units(object):
     def __pow__(self, other):
         tmp = combined_units()
         if isinstance(other, float) or isinstance(other, int):
-            tmp._magnitude = self._magnitude
             for unit in self._components:
                  tmp._components[unit] = self._components[unit]*other
-            tmp._magnitude = self._magnitude**other
+            tmp._magnitude = pow(self._magnitude, other)
 
         elif isinstance(other, phys_float):
             tmp._magnitude = self._magnitude
@@ -157,6 +156,10 @@ class combined_units(object):
             raise Exception("Invalid Division '{}/{}'".format(type(self), type(other)))
             
         return tmp
+    
+    def __rtruediv__(self, other):
+        tmp = self.__pow__(-1)
+        return tmp*other
 
 
     def __str__(self):
@@ -287,6 +290,9 @@ class phys_float(si_unit):
 
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    def __pow__(self, other):
+        return phys_float(self._magnitude**other)
 
     def __truediv__(self, other):
         if isinstance(other, phys_float):
