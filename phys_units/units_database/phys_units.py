@@ -51,14 +51,11 @@ class combined_units(object):
                     tmp._components[unit] = 0
                 tmp._components[unit] += other._components[unit]
 
-        elif isinstance(si_unit, other.__class__):
+        elif isinstance(si_unit, other.__class__) or issubclass(si_unit, other.__class__):
             tmp._magnitude = self._magnitude
             if other not in tmp._components.keys():
                 tmp._components[other] = 0
             tmp._components[other] += 1
-
-        elif issubclass(si_unit, other.__class__):
-            tmp._magnitude = self._magnitude 
 
         elif isinstance(other, float) or isinstance(other, int):
             tmp._magnitude = self._magnitude * other
@@ -68,6 +65,9 @@ class combined_units(object):
 
         else:
             raise Exception("Invalid Product '{}*{}'".format(type(other), type(self)))
+
+        if tmp.get_magnitude() == 0:
+            return 0
             
         return tmp
 
@@ -169,14 +169,13 @@ class combined_units(object):
         for key, label in zip(_sorted_keys, _sorted_units):
             _out_str += '{}{}.'.format(label if self._components[key] != 0 else '', '^{}'.format(self._components[key]) if self._components[key] not in [1,0] else '')
         _out_str = '{}'.format(self._magnitude.__str__() if self._magnitude.__str__() != '1' else '')+_out_str[:-1]
-        #if self._magnitude.__str__() == '0':
-        #   _out_str = '0'
         if _out_str[-1] == '.':
             _out_str = _out_str[:-1]
         return _out_str
 
     def __repr__(self):
-        return "<UnitsCombination('{}'), [{}]>".format(','.join([x._unit_string for x in self._components.keys()]), 
+        return "<{}*UnitsCombination('{}'), [{}]>".format(self._magnitude,
+                                                    ','.join([x._unit_string for x in self._components.keys()]), 
                                                        ','.join([str(val) for val in self._components.values()]))
 
     def measures(self):
@@ -211,11 +210,16 @@ class si_unit(object):
     def __mul__(self, other):
         if type(self) == type(other):
             return combined_units([self], [2])
-        if isinstance(other, combined_units):
+        elif isinstance(other, combined_units):
+            if other.get_magnitude() == 0:
+                return 0
             return combined_units([self], [1])*other
 
-        if isinstance(other, si_unit):
+        elif isinstance(other, si_unit):
             return combined_units([self, other], [1,1])
+
+        elif int(other) == 0:
+            return 0
 
         else:
             return combined_units((phys_float(other), self), [1,1])
@@ -279,14 +283,16 @@ class phys_float(si_unit):
 
     def __mul__(self, other):
         if isinstance(other, phys_float):
+            if other.get_magnitude() == 0:
+                return 0
             return phys_float(self._magnitude*other._magnitude)
         elif isinstance(other, float) or isinstance(other, int):
             return phys_float(self._magnitude*other)
       
         elif isinstance(other, combined_units):
-            _tmp = other.clone()
-            _tmp._magnitude *= phys_float(other.get_magnitude())
-            return _tmp
+            if other.get_magnitude() == 0:
+                return 0
+            return other.__mul__(self)
 
         else:
             return si_unit.__mul__(other)
