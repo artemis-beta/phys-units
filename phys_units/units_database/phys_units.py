@@ -30,7 +30,7 @@ class combined_units(object):
 
     def __eq__(self, other):
         if isinstance(other, int) or isinstance(other, float):
-            return self._magnitude._magnitude == other
+            return math.isclose(self.get_magnitude(), other) 
 
         if isinstance(other, si_unit):
             _tmp = combined_units((other,), (1,))
@@ -105,8 +105,7 @@ class combined_units(object):
                                                 
 
     def _compare_two(self, other):
-        from math import isclose
-        if set(self._components.keys()) == set(other._components.keys()) and isclose(self._magnitude._magnitude, other._magnitude._magnitude, rel_tol=1e-9, abs_tol=0.0):
+        if set(self._components.keys()) == set(other._components.keys()) and math.isclose(self.get_magnitude(), other.get_magnitude()):
             for key in self._components:
                 if self._components[key] != other._components[key]:
                     return False
