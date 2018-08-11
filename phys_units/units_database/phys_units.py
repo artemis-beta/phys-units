@@ -205,11 +205,9 @@ class si_unit(object):
         return self._python_string
 
     def __mul__(self, other):
-        if other._desc ==  self._desc:
-            print("A")
+        if isinstance(other, self.__class__) and other._desc ==  self._desc:
             return combined_units([self], [2])
         elif isinstance(other, combined_units):
-            print("B")
             if other.get_magnitude() == 0:
                 return 0
             return combined_units([self], [1])*other
@@ -222,35 +220,16 @@ class si_unit(object):
             return 0
 
         else:
-            print("D")
             return combined_units((phys_float(other), self), [1,1])
 
     def __rmul__(self, other):
         return self.__mul__(other)
 
     def __truediv__(self, other):
-        if type(self) == type(other):
-            return combined_units()
-        if isinstance(other, combined_units):
-            return combined_units([self], [1])/other
-
-        if isinstance(other, si_unit):
-            return combined_units([self, other], [1,-1])
-
-        else:
-            return combined_units((phys_float(other), self), [1,-1])
+        return self.__mul__(combined_units([other], [-1]))
 
     def __rtruediv__(self, other):
-        if isinstance(other, int) or isinstance(other, float):
-            _tmp = combined_units([self], [-1])
-            _tmp._magnitude = phys_float(other)
-            return _tmp
-        if isinstance(other, phys_float):
-            _tmp = combined_units([self], [-1])
-            _tmp._magnitude = other
-            return _tmp
-        else:
-            return other.__truediv__(self)
+        return other.__rmul__(combined_units([self], [-1]))
 
     def __pow__(self, other):
         if isinstance(other, float) or isinstance(other, int):
@@ -261,8 +240,14 @@ class si_unit(object):
             raise Exception("Could not Apply Exponent of Type '{}' to Phys_Float".format(type(other)))
 
     def __add__(self, other):
-        if type(self) == type(other):
+        try:
+            assert self._desc == other._desc
             return self
+        except AssertionError:
+            raise TypeError("Cannot Add Units '{}' and '{}'".format(self._desc, other._desc))
+        
+    def __sub__(self, other):
+        return self.__add__(other)
 
     def __str__(self):
         return self._unit_string
