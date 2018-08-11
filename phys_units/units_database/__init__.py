@@ -8,8 +8,24 @@ s    = pu.si_unit('s', "<Unit('s'), 'second', 'time'>", 'time')
 kg   = pu.si_unit('kg', "<Unit('kg'), 'kilogram', 'mass'>", 'mass') 
 m    = pu.si_unit('m', "<Unit('m'), 'metre', 'length'>", 'length')
 rad  = pu.si_unit('rad', "<Unit('rad'), 'radian', 'angle'>", 'angle')
+sr   = pu.si_unit('sr', "<Unit('sr'), 'steradian', 'solid angle'>", 'solid angle')
 K    = pu.si_unit('K', "<Unit('K'), 'kelvin', 'temperature'>", 'temperature')
 mol  = pu.si_unit('mol', "<Unit('mol'), 'mol', 'quantity'>", 'quantity')
+cd   = pu.si_unit('cd', "<Unit('cd'), 'candela', 'luminous intensity'>", 'luminous intensity')
+
+######################### DISTANCE ##############################
+
+cm       = m.clone('cm', 1E-2, 'centimetre')
+mm       = m.clone('mm', 1E-3, 'millimetre')
+km       = m.clone('km', 1000, 'kilometre')
+nm       = m.clone('nm', 1E-9, 'nanometre')
+angstrom = m.clone('Å', 1E-10, 'angstrom')
+yd       = m.clone('yd', 0.9144, 'yard')
+mile     = m.clone('miles', 1609.344)
+inch     = cm.clone('in', 2.54, 'inch')
+ft       = cm.clone('ft', 30.48, 'feet')
+furlong  = yd.clone('furlongs', 220)
+rod      = yd.clone('rods', 5.5)
 
 #################### COMPOUND SI UNITS ##########################
 
@@ -19,6 +35,9 @@ C = pu.combined_units((s,A), (1, 1), 'charge', 'C')
 V = pu.combined_units((kg, m, s, A), (1,2,-3,-1), 'volt', 'V')
 J = pu.combined_units((kg, m, s), (1,2,-2), 'joule', 'J')
 N = pu.combined_units((kg, m, s), (1,1,-2), 'newton', 'N')
+L = pu.combined_units((m,), (3,), '', '').clone('L', 1E-3, 'Litre')
+ha = pu.combined_units((m,), (2,), '', '').clone('ha', 1E4, 'hectare')
+Pa = pu.combined_units((kg, m, s), (1, -1, -2), 'pascal', 'Pa')
 
 all_cunits += [C,V,J,N]
 
@@ -46,12 +65,85 @@ pb = b.clone('pb', 1E-12)
 
 W = J*s
 W._label = 'W'
+W._other_label = 'watt'
+W._desc = 'power'
+
+celsius = K.clone('ᵒC', 273.15, 'celsius')
 
 #----------------------------------------------------------#
 
 
 F = C/V
 F._label = 'F'
+F._other_label = 'farad'
+F._desc = 'capacitance'
+
+#----------------------------------------------------------#
+
+Hz = 1/s
+Hz._label = 'Hz'
+Hz._other_label = 'hertz'
+Hz._desc = 'frequency'
+
+#----------------------------------------------------------#
+
+ohm = V/A
+ohm._label = 'Ω'
+ohm._other_label = 'ohm'
+ohm._desc = 'resistance'
+
+S = 1/ohm
+S._label = 'S'
+S._other_label = 'siemens'
+
+#----------------------------------------------------------#
+
+Wb = V*s
+Wb._desc = 'magnetic flux'
+Wb._label = 'Wb'
+Wb._other_label = 'weber'
+
+T = Wb/m**2
+T._desc = 'magnetic field strength'
+T._label = 'T'
+T._other_label = 'tesla'
+
+H = Wb/A
+H._desc = 'inductance'
+H._other_label = 'henry'
+H._label = 'H'
+
+#---------------------------------------------------------#
+
+lm = cd*sr
+lm._desc = 'luminous flux'
+lm._label = 'lm'
+lm._other_label = 'lumen'
+
+lx = lm/m**2
+lx._desc = 'illuminance'
+lx._other_label = 'lux'
+lx._label = 'lx'
+
+#---------------------------------------------------------#
+
+Bq = Hz.clone('Bq', 1, 'becquerel')
+Bq._desc = 'radioactivity'
+
+Gy = J/kg
+Gy._desc = 'absorbed dose of ionising radiation'
+Gy._label = 'Gy'
+Gy._other_label = 'gray'
+
+Sv = Gy.clone('Sv', 1, 'seivert')
+Sv._desc = 'equivalent dose of ionising radiation'
+
+#---------------------------------------------------------#
+
+kat = mol/s
+kat._desc = 'catalytic activity'
+kat._label = 'kat'
+kat._other_label = 'katal'
 
 ######################## CONSTANTS ##############################
 

@@ -182,15 +182,16 @@ class combined_units(object):
         return _out_str
 
     def __repr__(self):
-        return "<{}*UnitsCombination('{}'), [{}]>".format(self._magnitude,
+        return "<{}*UnitsCombination('{}'), [{}]{}>".format(self._magnitude,
                                                     ','.join([x._unit_string for x in self._components.keys()]), 
-                                                       ','.join([str(val) for val in self._components.values()]))
+                                                       ','.join([str(val) for val in self._components.values()]),
+                                                    ', "{}"'.format(self._desc) if self._desc != '' else '')
 
     def measures(self):
         return self._desc
 
-    def clone(self, label=None, const=1):
-        tmp = combined_units(desc=label)
+    def clone(self, label=None, const=1, desc=''):
+        tmp = combined_units(desc=desc)
         tmp._label = label
         tmp._magnitude = self._magnitude*phys_float(const)
         for unit in self._components:
@@ -239,6 +240,8 @@ class si_unit(object):
         return self.__mul__(combined_units([other], [-1]))
 
     def __rtruediv__(self, other):
+        if isinstance(other, int) or isinstance(other, float):
+            return other*combined_units([self], [-1])
         return other.__rmul__(combined_units([self], [-1]))
 
     def __pow__(self, other):
@@ -265,8 +268,8 @@ class si_unit(object):
     def measures(self):
         return self._desc
 
-    def clone(self, label, constant=1):
-        return combined_units((self,), (1,), '', label, const=constant)
+    def clone(self, label, constant=1, desc=''):
+        return combined_units((self,), (1,), desc, label, const=constant)
 
 class phys_float(si_unit):
     def __init__(self, magnitude):
