@@ -41,11 +41,15 @@ class combined_units(object):
         return self._compare_two(_tmp)
 
     def has_units(self, other):
-        if isinstance(other, list):
-            _comp = sorted([j._unit_string for j in self._components.keys()]) == sorted(other)
+        if isinstance(other, tuple):
+            _labels_self = [i._unit_string for i in self._components.keys()]
+            _comp = sorted([j._unit_string for j in self._components.keys()]) == sorted(other[0])
+            _index_comp = [self._components[_labels_self.index(i)] for i in other[0]] == other[1]
         elif isinstance(other, combined_units):
+            _labels_other = [i._unit_string for i in other._components.keys()]
             _comp = sorted([j._unit_string for j in self._components.keys()]) == sorted([k._unit_string for k in other._components.keys()])
-        return _comp      
+            _index_comp = all([self._components[i] == other._components[i] for i in self._components.keys()])
+        return _comp and _index_comp
 
     def __mul__(self, other):
         tmp = self.clone()
