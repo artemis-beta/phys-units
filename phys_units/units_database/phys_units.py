@@ -52,10 +52,7 @@ class combined_units(object):
                 tmp._components[unit] += other._components[unit]
 
         elif isinstance(si_unit, other.__class__) or issubclass(si_unit, other.__class__):
-            tmp._magnitude = self._magnitude
-            if other not in tmp._components.keys():
-                tmp._components[other] = 0
-            tmp._components[other] += 1
+            return other.__mul__(self)
 
         elif isinstance(other, float) or isinstance(other, int):
             tmp._magnitude = self._magnitude * other
@@ -208,20 +205,24 @@ class si_unit(object):
         return self._python_string
 
     def __mul__(self, other):
-        if type(self) == type(other):
+        if other._desc ==  self._desc:
+            print("A")
             return combined_units([self], [2])
         elif isinstance(other, combined_units):
+            print("B")
             if other.get_magnitude() == 0:
                 return 0
             return combined_units([self], [1])*other
 
         elif isinstance(other, si_unit):
+            print("C")
             return combined_units([self, other], [1,1])
 
         elif int(other) == 0:
             return 0
 
         else:
+            print("D")
             return combined_units((phys_float(other), self), [1,1])
 
     def __rmul__(self, other):
@@ -262,7 +263,6 @@ class si_unit(object):
     def __add__(self, other):
         if type(self) == type(other):
             return self
-
 
     def __str__(self):
         return self._unit_string
@@ -314,4 +314,7 @@ class phys_float(si_unit):
 
     def __str__(self):
         return str(self._magnitude)
+    
+    def __cos__(self):
+        return phys_float(math.cos(self._magnitude))
 
