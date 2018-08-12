@@ -1,5 +1,7 @@
 import math
 
+import units_database as ud
+
 class combined_units(object):
     def __init__(self, components=[], power_ratio=[], desc=False, other_label=None, const=None):
         self._components = {}
@@ -169,14 +171,17 @@ class combined_units(object):
         tmp = self.__pow__(-1)
         return tmp*other
 
+    def as_si(self):
+        return self.__str__(True)
 
-    def __str__(self):
+    def __str__(self, as_si=False):
+        tmp = ud.simplify(self) if not as_si else self
         _out_str = ''
-        _sorted_units = sorted([x._unit_string for x in self._components]) 
-        _sorted_keys  = [self._get_key(x) for x in _sorted_units]
+        _sorted_units = sorted([x._unit_string for x in tmp._components]) 
+        _sorted_keys  = [tmp._get_key(x) for x in _sorted_units]
         for key, label in zip(_sorted_keys, _sorted_units):
-            _out_str += '{}{}.'.format(label if self._components[key] != 0 else '', '^{}'.format(self._components[key]) if self._components[key] not in [1,0] else '')
-        _out_str = '{}'.format(self._magnitude.__str__() if self._magnitude.__str__() != '1' else '')+_out_str[:-1]
+            _out_str += '{}{}.'.format(label if tmp._components[key] != 0 else '', '^{}'.format(tmp._components[key]) if tmp._components[key] not in [1,0] else '')
+        _out_str = '{}'.format(tmp._magnitude.__str__() if tmp._magnitude.__str__() != '1' else '')+_out_str[:-1]
         if _out_str[-1] == '.':
             _out_str = _out_str[:-1]
         return _out_str
