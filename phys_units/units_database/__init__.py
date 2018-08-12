@@ -22,9 +22,9 @@ nm       = m.clone('nm', 1E-9, 'nanometre')
 angstrom = m.clone('Å', 1E-10, 'angstrom')
 yd       = m.clone('yd', 0.9144, 'yard')
 mile     = m.clone('miles', 1609.344)
-inch     = cm.clone('in', 2.54, 'inch')
-ft       = cm.clone('ft', 30.48, 'feet')
-furlong  = yd.clone('furlongs', 220)
+inch     = cm.clone('in', 2.54E-2, 'inch')
+ft       = cm.clone('ft', 30.48, 'foot')
+furlong  = yd.clone('furlongs', 220, 'furlong')
 rod      = yd.clone('rods', 5.5)
 
 #################### COMPOUND SI UNITS ##########################
@@ -43,8 +43,12 @@ all_cunits += [C,V,J,N]
 
 #---------------------- Astro -----------------------------#
 
-M_sol = pu.combined_units((kg,), (1,), 'solar mass', 'M_sol', const=2E30)
+M_sol = pu.combined_units((kg,), (1,), 'solar mass', 'M_ʘ', const=2E30)
+R_sol = pu.combined_units((m,), (1,), 'solar radius', 'R_ʘ', const=6.957E8)
+M_earth = pu.combined_units((kg,), (1,), 'earth mass', 'M_𐌈', const=5.9722E24)
+R_earth = pu.combined_units((kg,), (1,), 'earth radius', 'R_𐌈', const=6.3781E6)
 pc = pu.combined_units((m,), (1,), 'distance', 'pc', 'parsec', const=3.086E16)
+AU = pu.combined_units((m,), (1,), 'distanct', 'AU', 'astronomical unit', const=1.495978707E8)
 Mpc = pc.clone('Mpc', 1E6)
 Gpc = pc.clone('Gpc', 1E9)
 erg = pu.combined_units((kg, m, s), (1, 2, -2), 'work done', 'erg', const=1E-7)

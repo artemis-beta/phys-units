@@ -30,5 +30,5 @@ F = G*M_sol*M_earth/AU**2
 #                                                                            #
 #----------------------------------------------------------------------------#
 
-print('The Force of Gravity between the Sun and Earth'+
+print('The Force of Gravity between the Sun and Earth '+
       'is {}'.format(F.as_unit(N)))

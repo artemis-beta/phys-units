@@ -5,6 +5,7 @@ import units_database as ud
 class combined_units(object):
     def __init__(self, components=[], power_ratio=[], desc='', label='', other_label='', const=None):
         self._components = {}
+        self._const = const if const else 1
         self._magnitude = phys_float(const) if const else phys_float(1)
         self._desc = desc if desc else 'Quantity Has No Known Label'
         self._label = label
@@ -16,7 +17,10 @@ class combined_units(object):
                 self._components[component] = exponent
 
     def as_base(self):
-        return si_unit(self._label, "<Unit('{}'), {}, {}>".format(self._label, self._other_label, self._desc), self._desc)
+        _unit = si_unit(self._label, "<Unit('{}'), {}, {}>".format(self._label, self._other_label, self._desc), self._desc)
+        _comb_unit = combined_units(components=[_unit], power_ratio=[1], const=self._const)
+        _comb_unit._magnitude = self._magnitude/self._const
+        return _comb_unit
 
     def __sin__(self):
         return phys_float(math.sin(self.get_magnitude()))
@@ -55,6 +59,13 @@ class combined_units(object):
             _labels_other = [i._unit_string for i in other._components.keys()]
             _comp = sorted([j._unit_string for j in self._components.keys()]) == sorted([k._unit_string for k in other._components.keys()])
             _index_comp = all([self._components[i] == other._components[i] for i in self._components.keys()])
+        elif isinstance(other, si_unit):
+            _single_unit = len(self._components.keys()) == 1
+            _same_unit = list(self._components.keys())[0] == other
+            return _single_unit and _same_unit
+        else:
+            print("Shound not get here!")
+            raise AssertionError
         return _comp and _index_comp
 
     def __mul__(self, other):
@@ -178,8 +189,13 @@ class combined_units(object):
     def as_unit(self, unit):
         assert self.has_units(unit), "Incompatible unit types"
         _tmp = unit
-        magnitude = self._magnitude/unit._magnitude
-        return '{}*{}'.format(magnitude, _tmp.as_base().__str__())
+        if isinstance(unit, si_unit):
+            return self.get_magnitude()*unit
+        else:
+            magnitude = self._magnitude/unit._magnitude
+            _base = _tmp.as_base()
+            _base._magnitude = phys_float(1)
+            return '{}{}'.format(magnitude, _base)    
 
     def as_si(self):
         return self.__str__(True)
@@ -191,7 +207,7 @@ class combined_units(object):
         _sorted_keys  = [tmp._get_key(x) for x in _sorted_units]
         for key, label in zip(_sorted_keys, _sorted_units):
             _out_str += '{}{}.'.format(label if tmp._components[key] != 0 else '', '^{}'.format(tmp._components[key]) if tmp._components[key] not in [1,0] else '')
-        _out_str = '{}'.format(tmp._magnitude.__str__() if tmp._magnitude.__str__() != '1' else '')+_out_str[:-1]
+        _out_str = '{}'.format(tmp._magnitude.__str__() if float(tmp._magnitude.__str__()) != 1. else '')+_out_str[:-1]
         if _out_str[-1] == '.':
             _out_str = _out_str[:-1]
         return _out_str
@@ -205,7 +221,7 @@ class combined_units(object):
     def measures(self):
         return self._desc
 
-    def clone(self, label=None, const=1, desc=None, other_label=None):
+    def clone(self, label=None, const=None, desc=None, other_label=None):
         if not label:
             label = self._label
         if not desc:
@@ -213,8 +229,11 @@ class combined_units(object):
         if not other_label:
             other_label = self._other_label
 
+        const = self._const if not const else const
+
         tmp = combined_units(desc=desc, other_label=other_label)
         tmp._label = label
+        tmp._const = const
         tmp._magnitude = self._magnitude*phys_float(const)
         for unit in self._components:
              tmp._components[unit] = self._components[unit]
