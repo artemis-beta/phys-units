@@ -3,16 +3,20 @@ import math
 import units_database as ud
 
 class combined_units(object):
-    def __init__(self, components=[], power_ratio=[], desc=False, other_label=None, const=None):
+    def __init__(self, components=[], power_ratio=[], desc='', label='', other_label='', const=None):
         self._components = {}
         self._magnitude = phys_float(const) if const else phys_float(1)
         self._desc = desc if desc else 'Quantity Has No Known Label'
-        self._label = other_label
+        self._label = label
+        self._other_label = other_label
         for component, exponent in zip(tuple(components), tuple(power_ratio)):
             if isinstance(component, phys_float):
                 self._magnitude *= component
             else:
                 self._components[component] = exponent
+
+    def as_base(self):
+        return si_unit(self._label, "<Unit('{}'), {}, {}>".format(self._label, self._other_label, self._desc), self._desc)
 
     def __sin__(self):
         return phys_float(math.sin(self.get_magnitude()))
@@ -171,6 +175,12 @@ class combined_units(object):
         tmp = self.__pow__(-1)
         return tmp*other
 
+    def as_unit(self, unit):
+        assert self.has_units(unit), "Incompatible unit types"
+        _tmp = unit
+        magnitude = self._magnitude/unit._magnitude
+        return '{}*{}'.format(magnitude, _tmp.as_base().__str__())
+
     def as_si(self):
         return self.__str__(True)
 
@@ -195,8 +205,15 @@ class combined_units(object):
     def measures(self):
         return self._desc
 
-    def clone(self, label=None, const=1, desc=''):
-        tmp = combined_units(desc=desc)
+    def clone(self, label=None, const=1, desc=None, other_label=None):
+        if not label:
+            label = self._label
+        if not desc:
+            desc = self._desc
+        if not other_label:
+            other_label = self._other_label
+
+        tmp = combined_units(desc=desc, other_label=other_label)
         tmp._label = label
         tmp._magnitude = self._magnitude*phys_float(const)
         for unit in self._components:
@@ -273,7 +290,11 @@ class si_unit(object):
     def measures(self):
         return self._desc
 
-    def clone(self, label, constant=1, desc=''):
+    def clone(self, label, constant=1, desc=None, other_label=None):
+        if not desc:
+            desc = self._desc
+        if not other_label:
+            other_label = ''
         return combined_units((self,), (1,), desc, label, const=constant)
 
 class phys_float(si_unit):

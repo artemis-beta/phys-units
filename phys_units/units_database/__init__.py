@@ -31,20 +31,20 @@ rod      = yd.clone('rods', 5.5)
 
 all_cunits = []
 
-C = pu.combined_units((s,A), (1, 1), 'charge', 'C')
-V = pu.combined_units((kg, m, s, A), (1,2,-3,-1), 'volt', 'V')
-J = pu.combined_units((kg, m, s), (1,2,-2), 'joule', 'J')
-N = pu.combined_units((kg, m, s), (1,1,-2), 'newton', 'N')
-L = pu.combined_units((m,), (3,), '', '').clone('L', 1E-3, 'Litre')
-ha = pu.combined_units((m,), (2,), '', '').clone('ha', 1E4, 'hectare')
-Pa = pu.combined_units((kg, m, s), (1, -1, -2), 'pascal', 'Pa')
+C = pu.combined_units((s,A), (1, 1), 'charge', 'C', 'coulomb')
+V = pu.combined_units((kg, m, s, A), (1,2,-3,-1), 'voltage', 'V', 'volt')
+J = pu.combined_units((kg, m, s), (1,2,-2), 'energy', 'J', 'joule')
+N = pu.combined_units((kg, m, s), (1,1,-2), 'force', 'N', 'newton')
+L = pu.combined_units((m,), (3,), '', '').clone('L', 1E-3, 'volume', 'litre')
+ha = pu.combined_units((m,), (2,), '', '').clone('ha', 1E4, 'area', 'hectare')
+Pa = pu.combined_units((kg, m, s), (1, -1, -2), 'pressure', 'Pa', 'pascal')
 
 all_cunits += [C,V,J,N]
 
 #---------------------- Astro -----------------------------#
 
 M_sol = pu.combined_units((kg,), (1,), 'solar mass', 'M_sol', const=2E30)
-pc = pu.combined_units((m,), (1,), 'parsec', 'pc', const=3.086E16)
+pc = pu.combined_units((m,), (1,), 'distance', 'pc', 'parsec', const=3.086E16)
 Mpc = pc.clone('Mpc', 1E6)
 Gpc = pc.clone('Gpc', 1E9)
 erg = pu.combined_units((kg, m, s), (1, 2, -2), 'work done', 'erg', const=1E-7)
@@ -57,7 +57,7 @@ MeV =  eV.clone('MeV', 1E6)
 GeV =  eV.clone('GeV', 1E9)
 TeV =  eV.clone('TeV', 1E12)
 
-b  = pu.combined_units((m,), (2,), 'squared metre', 'm^2').clone('b', 1E-28)
+b  = pu.combined_units((m,), (2,), 'area', 'm^2', '').clone('b', 1E-28, desc='cross section')
 fb = b.clone('fb', 1E-15)
 pb = b.clone('pb', 1E-12)
 
@@ -68,7 +68,7 @@ W._label = 'W'
 W._other_label = 'watt'
 W._desc = 'power'
 
-celsius = K.clone('ᵒC', 273.15, 'celsius')
+celsius = K.clone('ᵒC', 273.15, other_label='celsius')
 
 #----------------------------------------------------------#
 
@@ -127,7 +127,7 @@ lx._label = 'lx'
 
 #---------------------------------------------------------#
 
-Bq = Hz.clone('Bq', 1, 'becquerel')
+Bq = Hz.clone('Bq', 1, 'radioactivity', 'becquerel')
 Bq._desc = 'radioactivity'
 
 Gy = J/kg
@@ -135,7 +135,7 @@ Gy._desc = 'absorbed dose of ionising radiation'
 Gy._label = 'Gy'
 Gy._other_label = 'gray'
 
-Sv = Gy.clone('Sv', 1, 'seivert')
+Sv = Gy.clone('Sv', 1, other_label='seivert')
 Sv._desc = 'equivalent dose of ionising radiation'
 
 #---------------------------------------------------------#
