@@ -103,7 +103,6 @@ class combined_units(object):
 
         float     the magnitude of the measure (e.g. 5 for 5miles)
         '''
-        The magnitude of the unit
         return self._magnitude._magnitude
 
     def __eq__(self, other):
@@ -374,6 +373,7 @@ class combined_units(object):
         desc        (float)         description of what the unit measures
 
         other_label (string)        the word name for the unit (e.g. kilometre)
+        '''
         if not label:
             label = self._label
         if not desc:
