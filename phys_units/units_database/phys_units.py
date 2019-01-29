@@ -257,6 +257,8 @@ class combined_units(object):
     def __sub__(self, other):
         tmp = self.clone()
         try:
+            if other == 0:
+                return self
             assert self.check_dimensionality(other)
         except BaseException:
             raise Exception(
