@@ -35,3 +35,25 @@ showing an example of a compound unit formed of powers of the SI units `m` and `
 
 
 ### Example 2: Converting Distances
+
+For the second example we take the case of wanting to know what a distance given in metres is in other units of length:
+
+```
+from units_database import m, pc, miles, yds
+
+distance = 1089*m
+
+print("I walked {}".format(distance))
+print("Which is {}".format(distance.as_unit(miles)))
+print("Equivalent also to {}".format(distance.as_unit(yds)))
+print("Or {}".format(distance.as_unit(pc)))
+```
+
+which gives the output:
+
+```
+I walked 1089m
+Which is 0.6766732283464567miles
+Equivalent also to 1190.9448818897638yds
+Or 3.528839922229423e-14pc
+```
